@@ -1,4 +1,4 @@
-<project name="scriptcraft" default="package" basedir=".">
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="scriptcraft" default="package" basedir=".">
   <property file="build.properties"/>
   <description>Builds the scriptcraft.jar file - a plugin for bukkit</description>
   <!-- ScriptCraft works with:
@@ -13,12 +13,14 @@
   <!-- compiles against these libraries -->
   <property name="lib.canary" location="lib/canarymod-1.8.0.jar"/>
   <property name="lib.bukkit" location="lib/spigot-api-1.13.2-R0.1-SNAPSHOT-shaded.jar"/>
+  <!-- <property name="lib.nashorn" location="lib/nashorn-core-15.3.jar"/> -->
 
   <property name="build" location="target/classes"/>
   <property name="dist" location="target/" />
   <property name="minecraft.dir" location="${dist}/minecraft" />
   <property name="js-plugins-dir" value="scriptcraft"/>
   <property name="http.agent" value="'Walter'" />
+  <ivy:retrieve />
 
   <macrodef name="jscript">
     <attribute name="src"/>
@@ -29,15 +31,18 @@
     <sequential>
       <echo message="cp=${build}:${lib.canary}:${lib.bukkit}"></echo>
       <echo message="src=@{src} out=@{out} err=@{err}"></echo>
-      <java classname="jscript" 
-	    failonerror="true"
-	    fork="true" output="@{out}"  error="@{err}">
-	<classpath>
-          <pathelement path="${build}"/>      
-	  <pathelement path="@{lib}"/>
-	</classpath>
-      <arg value="@{src}"/>
-      <js-args/>
+      <java classname="jscript" failonerror="true" fork="true" output="@{out}" error="@{err}">
+        <!-- <classpath refid="class.path"> -->
+        <classpath>
+          <fileset dir="lib">
+            <include name="**/*.jar" />
+          </fileset>
+          <pathelement path="${build}"/>
+          <pathelement path="@{lib}"/>
+          <pathelement path="${lib.nashorn}"/>
+        </classpath>
+        <arg value="@{src}"/>
+        <js-args/>
       </java>
     </sequential>
   </macrodef>
@@ -45,9 +50,7 @@
   <target name="init">
     <property file="build.local.properties"/>
     <tstamp>
-      <format property="DSTAMP"
-              pattern="yyyy-MM-dd"
-              locale="en,UK"/>
+      <format property="DSTAMP" pattern="yyyy-MM-dd" locale="en,UK"/>
     </tstamp>
     <mkdir dir="${build}"/>
 
@@ -57,61 +60,43 @@
   </target>
 
   <target name="test" depends="package" description="Perform unit tests">
-    
+
   </target>
 
 
   <target name="compile-plugins" depends="init" description="compile canary plugin source">
-    <javac includeantruntime="false" 
-           source="1.6" 
-           target="1.6" 
-           destdir="${build}" 
-           debug="true">
+    <javac includeantruntime="false" source="1.7" target="1.7" destdir="${build}" debug="true">
       <src path="${src.canary}"/>
       <src path="${src.bukkit}"/>
       <classpath>
-	<pathelement path="${lib.canary}" />
-	<pathelement path="${lib.bukkit}" />
+        <pathelement path="${lib.canary}" />
+        <pathelement path="${lib.bukkit}" />
       </classpath>
     </javac>
   </target>
-    
-  <target name="gendocs"
-	  depends="construct-ypgpm, construct-api-ref"
-	  description="Generate API documentation">
+
+  <target name="gendocs" depends="construct-ypgpm, construct-api-ref" description="Generate API documentation">
   </target>
 
   <target name="compile-docs" depends="init">
     <javac includeantruntime="false" srcdir="src/docs/java" destdir="${build}">
       <classpath>
-	<pathelement path="${lib.canary}"/>
+        <pathelement path="${lib.canary}"/>
       </classpath>
     </javac>
   </target>
 
   <target name="generate-api-ref-entries" depends="copy-js,compile-docs,init">
 
-    <jscript src="src/docs/js/generateApiDocs.js" 
-	     out="${dist}/apiref.md"
-	     lib="${lib.bukkit}"
-	     err="${dist}/gen-api-error.log">
-      <arg value="${dist}/js"/>      
+    <jscript src="src/docs/js/generateApiDocs.js" out="${dist}/apiref.md" lib="${lib.bukkit}" err="${dist}/gen-api-error.log">
+      <arg value="${dist}/js"/>
     </jscript>
 
-    <jscript src="src/docs/js/generateItemsDocBukkit.js" 
-	     out="${dist}/items-bukkit.md"
-	     lib="${lib.bukkit}"
-	     err="${dist}/gen-items-error.log" />
+    <jscript src="src/docs/js/generateItemsDocBukkit.js" out="${dist}/items-bukkit.md" lib="${lib.bukkit}" err="${dist}/gen-items-error.log" />
 
-    <jscript src="src/docs/js/generateSoundsDocBukkit.js" 
-	     out="${dist}/sounds-bukkit.md" 
-	     lib="${lib.bukkit}"
-	     err="${dist}/gen-sounds-error.log" />
+    <jscript src="src/docs/js/generateSoundsDocBukkit.js" out="${dist}/sounds-bukkit.md" lib="${lib.bukkit}" err="${dist}/gen-sounds-error.log" />
 
-    <jscript src="src/docs/js/generateEntitiesDocBukkit.js" 
-	     out="${dist}/entities-bukkit.md"
-	     lib="${lib.bukkit}"
-	     err="${dist}/gen-entities-error.log" />
+    <jscript src="src/docs/js/generateEntitiesDocBukkit.js" out="${dist}/entities-bukkit.md" lib="${lib.bukkit}" err="${dist}/gen-entities-error.log" />
 
     <concat destfile="${dist}/apiref-con.md">
       <fileset file="${dist}/apiref.md" />
@@ -125,10 +110,7 @@
 
   <target name="gen-events-helper-canary" depends="compile-docs,init">
     <mkdir dir="${dist}/js/lib"/>
-    <jscript src="src/docs/js/generateEventsHelper.js" 
-	     out="${dist}/js/lib/events-helper-canary.js"
-	     lib="${lib.canary}"
-	     err="${dist}/gen-events-canary-error.log">
+    <jscript src="src/docs/js/generateEventsHelper.js" out="${dist}/js/lib/events-helper-canary.js" lib="${lib.canary}" err="${dist}/gen-events-canary-error.log">
       <arg value="CanaryMod"/>
       <arg value="${lib.canary}"/>
       <arg value="blockDestroy"/>
@@ -138,10 +120,7 @@
 
   <target name="gen-events-helper-bukkit" depends="compile-docs,init">
     <mkdir dir="${dist}/js/lib"/>
-    <jscript src="src/docs/js/generateEventsHelper.js" 
-	     out="${dist}/js/lib/events-helper-bukkit.js"
-	     lib="${lib.bukkit}"
-	     err="${dist}/gen-events-bukkit-error.log">
+    <jscript src="src/docs/js/generateEventsHelper.js" out="${dist}/js/lib/events-helper-bukkit.js" lib="${lib.bukkit}" err="${dist}/gen-events-bukkit-error.log">
       <arg value="SpigotMC"/>
       <arg value="${lib.bukkit}"/>
       <arg value="blockBreak"/>
@@ -169,23 +148,17 @@ Walter Higgins
       </header>
       <fileset file="${dist}/toc-apiref.md" />
       <fileset file="${dist}/apiref-con.md" />
-   </concat>      
+    </concat>
   </target>
-  
+
   <target name="gen-toc-apiref" depends="compile-docs,generate-api-ref-entries, init" description="Generate Table of Contents for API Reference">
-    <jscript src="src/docs/js/generateTOC.js" 
-	     out="${dist}/toc-apiref.md"
-	     lib="${lib.bukkit}"
-	     err="${dist}/gen-toc-error.log">
+    <jscript src="src/docs/js/generateTOC.js" out="${dist}/toc-apiref.md" lib="${lib.bukkit}" err="${dist}/gen-toc-error.log">
       <arg value="${dist}/apiref-con.md"/>
     </jscript>
   </target>
 
   <target name="gen-toc-ypgpm" depends="compile-docs,init" description="Generate Table of Contents for Young Programmers Guide">
-    <jscript src="src/docs/js/generateTOC.js" 
-	     out="${dist}/toc-ypgpm.md" 
-	     lib="${lib.bukkit}"
-	     err="${dist}/gen-ypgpm-error.log">
+    <jscript src="src/docs/js/generateTOC.js" out="${dist}/toc-ypgpm.md" lib="${lib.bukkit}" err="${dist}/gen-ypgpm-error.log">
       <arg value="src/docs/templates/ypgpm.md"/>
     </jscript>
   </target>
@@ -203,7 +176,7 @@ Walter Higgins
       </header>
       <fileset file="${dist}/toc-ypgpm.md" />
       <fileset file="src/docs/templates/ypgpm.md" />
-   </concat>      
+    </concat>
   </target>
 
   <target name="zip_js" depends="zip_lib, zip_modules, zip_plugins">
@@ -217,45 +190,47 @@ Walter Higgins
 
   <target name="zip_lib" depends="copy-js">
     <delete file="${build}/lib.zip"/>
-    <zip destfile="${build}/lib.zip" 
-         basedir="${dist}/js" 
-         excludes="modules/**, plugins/**,">
+    <zip destfile="${build}/lib.zip" basedir="${dist}/js" excludes="modules/**, plugins/**,">
     </zip>
   </target>
 
   <target name="get_babel" depends="copy-js" unless="babel.present">
     <!-- download babel -->
-    <get src="https://github.com/babel/babel-standalone/releases/download/release-6.26.0/babel.js"
-	 verbose="true"
-	 ignoreerrors="true"
-	 dest="${dist}/js/modules/babel.js"/>
+    <get src="https://github.com/babel/babel-standalone/releases/download/release-6.26.0/babel.js" verbose="true" ignoreerrors="true" dest="${dist}/js/modules/babel.js"/>
   </target>
 
   <target name="get_underscore" depends="copy-js" unless="underscore.present">
     <!-- download underscore -->
-    <get src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"
-	 verbose="true"
-	 ignoreerrors="true"
-	 dest="${dist}/js/modules/underscore.js"/>
+    <get src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js" verbose="true" ignoreerrors="true" dest="${dist}/js/modules/underscore.js"/>
   </target>
 
   <target name="zip_modules" depends="copy-js, get_underscore, get_babel">
     <delete file="${build}/modules.zip"/>
-    <zip destfile="${build}/modules.zip" 
-         basedir="${dist}/js" 
-         excludes="lib/**, plugins/**,">
+    <zip destfile="${build}/modules.zip" basedir="${dist}/js" excludes="lib/**, plugins/**,">
     </zip>
   </target>
 
   <target name="zip_plugins" depends="copy-js">
     <delete file="${build}/plugins.zip"/>
-    <zip destfile="${build}/plugins.zip" 
-         basedir="${dist}/js"
-         excludes="lib/**, modules/**">
+    <zip destfile="${build}/plugins.zip" basedir="${dist}/js" excludes="lib/**, modules/**">
     </zip>
   </target>
-  
-  <target name="package" depends="gendocs,zip_js,compile-plugins" description="generate the distribution" >
+
+  <!-- Group all dependencies into a big dependency-all.jar -->
+  <target name="copy-dependencies">
+
+    <mkdir dir="${build}/deps" />
+
+    <jar jarfile="${build}/deps/dependencies-all.jar">
+        <zipgroupfileset dir="lib">
+            <include name="**/nashorn-core-15.2.jar" />
+            <include name="**/asm*.jar" />
+        </zipgroupfileset>
+    </jar>
+
+  </target>  
+
+  <target name="package" depends="gendocs,zip_js,compile-plugins,copy-dependencies" description="generate the distribution">
     <!-- ensure plugin.yml is always copied -->
     <delete file="${build}/plugin.yml" />
     <delete file="${build}/Canary.inf" />
@@ -268,15 +243,17 @@ Walter Higgins
     <replace file="${build}/Canary.inf" value="${scriptcraft-version}-${DSTAMP}">
       <replacetoken>[[version]]</replacetoken>
     </replace>
-    
+
     <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
     <mkdir dir="${dist}/${DSTAMP}" />
-    
-    <jar jarfile="${dist}/${DSTAMP}/scriptcraft.jar" basedir="${build}"/>
+
+    <jar jarfile="${dist}/${DSTAMP}/scriptcraft.jar" basedir="${build}">
+      <zipfileset src="${build}/deps/dependencies-all.jar" excludes="META-INF/*.SF" />
+    </jar>
     <copy file="${dist}/${DSTAMP}/scriptcraft.jar" tofile="${dist}/scriptcraft.jar"/>
   </target>
 
-  <target name="clean" description="clean up" >
+  <target name="clean" description="clean up">
     <delete dir="${dist}"/>
   </target>
 
