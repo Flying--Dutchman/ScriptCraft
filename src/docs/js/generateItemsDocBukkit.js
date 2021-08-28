@@ -16,7 +16,7 @@ var content = [
   ''
 ];
 
-var enumVals = [],
+/* var enumVals = [],
   t,
   i,
   name;
@@ -38,3 +38,4 @@ content.push('');
 for (i = 0; i < content.length; i++) {
   out.println(content[i]);
 }
+*/

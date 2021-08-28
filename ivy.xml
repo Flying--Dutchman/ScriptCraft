@@ -1,0 +1,7 @@
+<ivy-module version="2.0">
+    <info organisation="org.apache" module="hello-ivy"/>
+    <dependencies>
+    <!-- https://mvnrepository.com/artifact/org.openjdk.nashorn/nashorn-core -->
+<dependency org="org.openjdk.nashorn" name="nashorn-core" rev="15.2"/>
+</dependencies>
+</ivy-module>
