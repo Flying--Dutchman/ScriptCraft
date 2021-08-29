@@ -2,6 +2,9 @@ package org.scriptcraftjs.canarymod;
 
 import java.io.InputStreamReader;
 import javax.script.ScriptEngineManager;
+
+import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory;
+
 import javax.script.ScriptEngine;
 import javax.script.Invocable;
 import java.util.List;
@@ -41,9 +44,12 @@ public class ScriptCraftPlugin extends Plugin implements PluginListener, Command
     public boolean enable()
     {
         try{
-            ScriptEngineManager factory = new ScriptEngineManager();
-            this.engine = factory.getEngineByName("JavaScript");
-            if (this.engine == null){
+//            ScriptEngineManager factory = new ScriptEngineManager();
+//            this.engine = factory.getEngineByName("JavaScript");
+        	NashornScriptEngineFactory factory = new org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory();
+//          ScriptEngineManager factory = new ScriptEngineManager();
+      	ScriptEngine engine = factory.getScriptEngine();
+        	if (this.engine == null){
                 this.getLogman().error(NO_JAVASCRIPT_MESSAGE);
             } else { 
                 Invocable inv = (Invocable)this.engine;

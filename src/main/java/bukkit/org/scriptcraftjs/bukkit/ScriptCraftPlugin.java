@@ -3,6 +3,7 @@ package org.scriptcraftjs.bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -27,8 +28,13 @@ public class ScriptCraftPlugin extends JavaPlugin
         ClassLoader previousClassLoader = currentThread.getContextClassLoader();
         currentThread.setContextClassLoader(getClassLoader());
         try {
-            ScriptEngineManager factory = new ScriptEngineManager(null);
-            this.engine = factory.getEngineByName("JavaScript");
+        	
+        	NashornScriptEngineFactory factory = new org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory();
+//          ScriptEngineManager factory = new ScriptEngineManager();
+        	this.engine = factory.getScriptEngine();
+      	
+//            ScriptEngineManager factory = new ScriptEngineManager(null);
+//           this.engine = factory.getEngineByName("JavaScript");
             if (this.engine == null) {
                 this.getLogger().severe(NO_JAVASCRIPT_MESSAGE);
             } else {
