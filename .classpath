@@ -15,7 +15,7 @@
 	<classpathentry kind="lib" path="lib/asm-tree-7.3.1.jar"/>
 	<classpathentry kind="lib" path="lib/asm-util-7.3.1.jar"/>
 	<classpathentry kind="lib" path="lib/canarymod-1.8.0.jar"/>
-	<classpathentry kind="lib" path="lib/nashorn-core-15.2.jar"/>
+	<classpathentry kind="lib" path="lib/nashorn-core-15.3.jar"/>
 	<classpathentry kind="lib" path="lib/spigot-api-1.13.2-R0.1-SNAPSHOT-shaded.jar"/>
 	<classpathentry kind="output" path="target"/>
 </classpath>

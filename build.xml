@@ -13,7 +13,7 @@
   <!-- compiles against these libraries -->
   <property name="lib.canary" location="lib/canarymod-1.8.0.jar"/>
   <property name="lib.bukkit" location="lib/spigot-api-1.13.2-R0.1-SNAPSHOT-shaded.jar"/>
-  <property name="lib.nashorn" location="lib/nashorn-core-15.2.jar"/>
+  <property name="lib.nashorn" location="lib/nashorn-core-15.3.jar"/>
 
   <property name="build" location="target/classes"/>
   <property name="dist" location="target/" />
