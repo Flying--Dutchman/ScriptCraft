@@ -24,10 +24,6 @@ jobs:
     - name: Build with Ant
       run: ant -noinput -buildfile build.xml -lib /home/runner/work/ScriptCraft/ScriptCraft/lib
       
-  archive-build-artifacts:
-    runs-on: ubuntu-latest
-    steps:
-
     - name: Step 1 - Create a temporary artifact downloads folder
       run: mkdir downloads
         
